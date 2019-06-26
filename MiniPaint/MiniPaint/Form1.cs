@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Windows.Forms;
 
 namespace MiniPaint
@@ -31,6 +33,8 @@ namespace MiniPaint
                 g.DrawLine(p, new Point(initX ?? e.X, initY ?? e.Y), new Point(e.X, e.Y));
                 initX = e.X;
                 initY = e.Y;
+
+                
             }
         }
         //Event Fired when the mouse pointer is over Panel and a mouse button is pressed
@@ -124,6 +128,16 @@ namespace MiniPaint
                 Application.Exit();
             }
         }
+        public Bitmap ResizeBitmap(Bitmap bmp, int width, int height)
+        {
+            Bitmap result = new Bitmap(width, height);
+            using (Graphics g = Graphics.FromImage(result))
+            {
+                g.DrawImage(bmp, 0, 0, width, height);
+            }
+
+            return result;
+        }
 
         private void button3_Click(object sender, EventArgs e)
         {
@@ -134,7 +148,9 @@ namespace MiniPaint
             if (open.ShowDialog() == DialogResult.OK)
             {
                 // display image in picture box  
-                pnl_Draw.BackgroundImage = new Bitmap(open.FileName);
+                Bitmap openb = new Bitmap(open.FileName);
+                Bitmap resized = ResizeBitmap(openb,720, 480);
+                pnl_Draw.BackgroundImage = resized;
                 pnl_Draw.BackColor = Color.White;
                 // image file path  
                 // textBox1.Text = open.FileName;
@@ -150,6 +166,7 @@ namespace MiniPaint
                 btn_gradient2.BackColor = c.Color;
             }
 
+
             Rectangle gradient_rectangle = new Rectangle(0, 0, pnl_Draw.Width, pnl_Draw.Height);
 
             //define gradient's properties
@@ -157,6 +174,8 @@ namespace MiniPaint
 
             //apply gradient         
             g.FillRectangle(b, gradient_rectangle);
+
+            
         }
 
         private void btn_gradient1_Click(object sender, EventArgs e)
@@ -168,6 +187,29 @@ namespace MiniPaint
             }
         }
 
-        
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            int width = pnl_Draw.Width;
+            int height = pnl_Draw.Height;
+
+            
+
+            Bitmap bm = new Bitmap(width, height,PixelFormat.Format32bppPArgb);
+           // Rectangle capture = new Rectangle()
+            Size s = new Size(width, height);
+            Graphics memory = Graphics.FromImage(bm);
+            memory.CopyFromScreen(this.Left+18, this.Top+130,0,0, s);
+        //    pnl_Draw.DrawToBitmap(bm, new Rectangle(0, 0, width, height));
+
+            SaveFileDialog sf = new SaveFileDialog();
+            sf.Filter = "Bitmap Image (.bmp)|*.bmp|Gif Image (.gif)|*.gif|JPEG Image (.jpeg)|*.jpeg|Png Image (.png)|*.png|Tiff Image (.tiff)|*.tiff|Wmf Image (.wmf)|*.wmf";
+            sf.ShowDialog();
+            var path = sf.FileName;
+
+           // pnl_Draw.DrawToBitmap(bm, new Rectangle(0, 0, width, height));
+            bm.Save(path, ImageFormat.Jpeg);
+
+
+        }
     }
 }
