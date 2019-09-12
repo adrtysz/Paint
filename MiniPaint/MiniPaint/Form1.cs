@@ -16,64 +16,87 @@ namespace MiniPaint
 
         bool startPaint = false;
         Graphics g;
+
         //nullable int for storing Null value
         int? initX = null;
         int? initY = null;
         bool drawSquare = false;
         bool drawRectangle = false;
         bool drawCircle = false;
+
+
+       
+        private int startX, startY;
+
+
+
         //Event fired when the mouse pointer is moved over the Panel(pnl_Draw).
         private void pnl_Draw_MouseMove(object sender, MouseEventArgs e)
         {
-            if(startPaint)
+          
+            if (startPaint)
             {
                 //Setting the Pen BackColor and line Width
                 Pen p = new Pen(btn_PenColor.BackColor,float.Parse(cmb_PenSize.Text));
+                // p.DashStyle = System.Drawing.Drawing2D.DashStyle.Dot;
                 //Drawing the line.
+                p.StartCap = System.Drawing.Drawing2D.LineCap.Round;
+                p.EndCap = System.Drawing.Drawing2D.LineCap.Round;
+
                 g.DrawLine(p, new Point(initX ?? e.X, initY ?? e.Y), new Point(e.X, e.Y));
                 initX = e.X;
                 initY = e.Y;
+            }
 
+
+            if(drawSquare&&startPaint)
+            {
+                Pen pp = new Pen(btn_PenColor.BackColor, 2);
+                Rectangle rect = new Rectangle(Math.Min(startX, e.X), Math.Min(startY, e.Y), Math.Max(startX, e.X) - Math.Min(startX, e.X), Math.Max(startY, e.Y) - Math.Min(startY, e.Y));
+
+                Refresh();
+                g.DrawRectangle(pp, rect);
+             
+
+             }
+           
+            if (drawCircle&&startPaint)
+            {
+                Pen pp = new Pen(btn_PenColor.BackColor, 2);
+
+             
+                Refresh();
+                g.DrawEllipse(pp, Math.Min(startX, e.X), Math.Min(startY, e.Y), Math.Max(startX, e.X) - Math.Min(startX, e.X), Math.Max(startY, e.Y) - Math.Min(startY, e.Y));
+                
                 
             }
+
+
         }
+
+
         //Event Fired when the mouse pointer is over Panel and a mouse button is pressed
         private void pnl_Draw_MouseDown(object sender, MouseEventArgs e)
         {
+            
             startPaint = true;
-            if (drawSquare)
-            {
-                //Use Solid Brush for filling the graphic shapes
-                SolidBrush sb = new SolidBrush(btn_PenColor.BackColor);
-                //setting the width and height same for creating square.
-                //Getting the width and Heigt value from Textbox(txt_ShapeSize)
-                g.FillRectangle(sb, e.X, e.Y, int.Parse(txt_ShapeSize.Text), int.Parse(txt_ShapeSize.Text));
-                //setting startPaint and drawSquare value to false for creating one graphic on one click.
-                startPaint = false;
-                drawSquare = false;
-            }
-            if(drawRectangle)
-            {
-                SolidBrush sb = new SolidBrush(btn_PenColor.BackColor);
-                //setting the width twice of the height
-                g.FillRectangle(sb, e.X, e.Y, 2*int.Parse(txt_ShapeSize.Text), int.Parse(txt_ShapeSize.Text));
-                startPaint = false;
-                drawRectangle = false;
-            }
-            if(drawCircle)
-            {
-                SolidBrush sb = new SolidBrush(btn_PenColor.BackColor);
-                g.FillEllipse(sb, e.X, e.Y, int.Parse(txt_ShapeSize.Text), int.Parse(txt_ShapeSize.Text));
-                startPaint = false;
-                drawCircle = false;
-            }
-        }
+            startX = e.X;
+            startY = e.Y;
+
+       
+        } 
+
+
         //Fired when the mouse pointer is over the pnl_Draw and a mouse button is released.
         private void pnl_Draw_MouseUp(object sender, MouseEventArgs e)
         {
             startPaint = false;
             initX = null;
             initY = null;
+
+            drawSquare = false;
+
+           
         }
         //Button for Setting pen Color
         private void button1_Click(object sender, EventArgs e)
@@ -111,10 +134,6 @@ namespace MiniPaint
             drawSquare = true;
         }
 
-        private void btn_Rectangle_Click(object sender, EventArgs e)
-        {
-            drawRectangle = true;
-        }
 
         private void btn_Circle_Click(object sender, EventArgs e)
         {
